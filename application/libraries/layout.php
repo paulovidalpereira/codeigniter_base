@@ -9,7 +9,7 @@ class Layout extends Object {
     private $_js_files = array();
     private $_js_head_files = array();
 
-    private $_layout = 'frontend';
+    private $_package = 'frontend';
 
     private $_titulo = '';
 
@@ -21,16 +21,16 @@ class Layout extends Object {
 
     public function view($file)
     {
-        $this->load->view($this->getLayout().'/'.$file);
+        $this->load->view($this->getPackage().'/'.$file);
     }
 
     public function render()
     {
         $this->load->vars($this->_data);
-        $this->load->view($this->getLayout().'/'.$this->getClass().'/'.$this->getMethod());
+        $this->load->view($this->getPackage().'/'.$this->getClass().'/'.$this->getMethod());
     }
 
-    public function addItem($file, $type = 'css', $package = null, $head = false)
+    public function addItem($file, $type, $package = null, $head = false)
     {
         if( $type == 'css' )
         {
@@ -39,7 +39,7 @@ class Layout extends Object {
                 $file = $file.'.css';
             }
 
-            $this->_css_files[] = site_url('skin/'.( ($package == null )? $this->getLayout() : $package ).'/'.$file);
+            $this->_css_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
 
         }
         elseif( $type == 'js' )
@@ -51,11 +51,11 @@ class Layout extends Object {
 
             if( ! $head )
             {
-                $this->_js_files[] = site_url('skin/'.( ($package == null )? $this->getLayout() : $package ).'/'.$file);
+                $this->_js_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
             }
             else
             {
-                $this->_js_head_files[] = site_url('skin/'.( ($package == null )? $this->getLayout() : $package ).'/'.$file);
+                $this->_js_head_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
             }
         }
     }
@@ -65,7 +65,7 @@ class Layout extends Object {
      */
     public function addCss($file)
     {
-        $this->addItem($file,'css');
+        $this->addItem('css/'.$file,'css');
     }
 
     /**
@@ -91,7 +91,7 @@ class Layout extends Object {
      */
     public function addJs($file, $head = false)
     {
-        $this->addItem($file,'js',null,$head);
+        $this->addItem('js/'.$file,'js',null,$head);
     }
 
     /**
@@ -132,14 +132,14 @@ class Layout extends Object {
         return $this->_method;
     }
 
-    public function setLayout($layout)
+    public function setPackage($package)
     {
-        return $this->_layout = $layout;
+        return $this->_package = $package;
     }
 
-    public function getLayout()
+    public function getPackage()
     {
-        return $this->_layout;
+        return $this->_package;
     }
 
     public function setTitulo($titulo)
