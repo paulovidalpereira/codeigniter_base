@@ -1,8 +1,8 @@
 MY_Controller
 -----------
 
-MY_MODEL
+MY_Model
 -----------
 
-MY_ROUTER
+MY_Router
 -----------
