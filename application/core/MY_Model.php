@@ -2,7 +2,11 @@
 
 class MY_Model extends CI_Model {
 
-    protected $_modelObject = NULL;
+    protected $_table;
+    protected $_modelObject;
+
+    protected $_validate = array();
+    protected $_skip_validation = FALSE;
 
     private $_result = FALSE;
     private $_num_rows = 0;
@@ -12,9 +16,11 @@ class MY_Model extends CI_Model {
     public function __construct()
     {
         parent::__construct();
+
+        $this->load->helper('inflector');
     }
 
-    public function getAll()
+    public function get_all()
     {
         $this->db->from($this->_table);
 
@@ -31,7 +37,7 @@ class MY_Model extends CI_Model {
         return $this;
     }
 
-    public function getCollection()
+    public function get_collection()
     {
         $this->db->from($this->_table);
         // $this->db->limit($this->_page_size,$this->_cur_page);
@@ -60,7 +66,7 @@ class MY_Model extends CI_Model {
         return $count;
     }
 
-    public function getRow()
+    public function get_row()
     {
         $this->db->from($this->_table);
 
@@ -75,12 +81,12 @@ class MY_Model extends CI_Model {
         return FALSE;
     }
 
-    public function getResult()
+    public function get_result()
     {
         return $this->_result;
     }
 
-    public function getNumRows()
+    public function get_num_rows()
     {
         return $this->_num_rows;
     }
@@ -99,28 +105,28 @@ class MY_Model extends CI_Model {
         return $this->getRow();
     }
 
-    public function getId()
+    public function get_id()
     {
         $primarykey = $this->_primarykey;
         return $this->$primarykey;
     }
 
-    public function getCreadoEm()
+    public function get_creado_em()
     {
-        return new DateTime($this->getData('creado_em'));
+        return new DateTime($this->get_data('creado_em'));
     }
 
-    public function getAtualizadoEm()
+    public function get_atualizado_em()
     {
-        return new DateTime($this->getData('atualizado_em'));
+        return new DateTime($this->get_data('atualizado_em'));
     }
 
-    public function getData($key)
+    public function get_data($key)
     {
         return isset($this->$key) ? $this->$key : NULL;
     }
 
-    public function loadByAttribute($attribute, $value)
+    public function load_by_atributo($attribute, $value)
     {
         $this->addAttributeToFilter($attribute, $value);
 
@@ -152,46 +158,29 @@ class MY_Model extends CI_Model {
         return $this->db->delete($this->_table,array($this->_primarykey => $this->id));
     }
 
+    public function update($data = array() ,$id)
+    {
+        return $this->db->update($this->_table,$data,array($this->_primarykey => $id));
+    }
+
     public function __call($method,$args)
     {
-        switch (substr($method, 0, 3))
+        switch (substr($method, 0, 4))
         {
-            case 'get':
-                $key = $this->_underscore(substr($method,3));
+            case 'get_':
+                $key = substr($method,4);
                 $data = isset($this->$key) ? $this->$key : NULL;
 
                 return $data;
 
-            case 'set':
-                $key = $this->_underscore(substr($method,3));
+            case 'set_':
+                $key = substr($method,4);
                 $this->key = isset($args[0]) ? $args[0] : NULL;
         }
 
     }
 
-    public function _underscore($name, $uppercase = FALSE)
-    {
-        $result = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", $name));
-
-        if( $uppercase )
-        {
-            $result = strtoupper($result);
-        }
-
-        return $result;
-    }
-
-    public function _camelize($name)
-    {
-        return $this->_uc_words($name, '');
-    }
-
-    public function _uc_words($str, $destSep = '_', $srcSep = '_')
-    {
-        return str_replace(' ', $destSep, ucwords(str_replace($srcSep, ' ', $str)));
-    }
-
-    public function addAttributeToSelect()
+    public function add_atributo_to_select()
     {
         $this->db
             ->select('*');
@@ -199,7 +188,7 @@ class MY_Model extends CI_Model {
         return $this;
     }
 
-    public function addAttributeToFilter($field, $condition = NULL)
+    public function add_atributo_to_filter($field, $condition = NULL)
     {
         if( ! is_array($condition) )
         {
@@ -224,43 +213,43 @@ class MY_Model extends CI_Model {
         return $this;
     }
 
-    public function addIsActiveFilter()
+    public function add_is_ativo_filter()
     {
         $this->db
-            ->where('active',1);
+            ->where('ativo',1);
 
         return $this;
     }
 
-    public function joinField($table,$where)
+    public function join_field($table,$where)
     {
         $this->db->join($table,$where);
 
         return $this;
     }
 
-    public function setOrder($field = 'id', $order = 'ASC')
+    public function set_order($field = 'id', $order = 'ASC')
     {
         $this->db->order_by($field,$order);
 
         return $this;
     }
 
-    public function setPageSize($size)
+    public function set_page_size($size)
     {
         $this->_page_size = $size;
 
         return $this;
     }
 
-    public function setCurPage($page)
+    public function set_cur_page($page)
     {
         $this->_cur_page = $page;
 
         return $this;
     }
 
-    public function setLimit($offset,$limit)
+    public function set_limit($offset,$limit)
     {
         $this->db->limit($offset,$limit);
 
