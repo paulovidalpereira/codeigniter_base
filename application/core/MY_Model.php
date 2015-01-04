@@ -13,29 +13,30 @@ class MY_Model extends CI_Model {
      * Atributos protegidos
      * Ex: $protected_attributes = array('id','hash');
      */
-    protected $protected_attributes = array();
+    protected $_protected_attributes = array();
 
+    protected $_data = FALSE;
     protected $_result = FALSE;
+
     protected $_num_rows = 0;
+
     protected $_page_size = 20;
     protected $_cur_page = 1;
 
-    protected $before_save = array();
-    protected $after_save = array();
-    protected $before_update = array();
-    protected $after_update = array();
-    protected $before_get = array();
-    protected $after_get = array();
-    protected $before_delete = array();
-    protected $after_delete = array();
+    protected $_before_get = array();
+    protected $_after_get = array();
+    protected $_before_insert = array();
+    protected $_after_insert = array();
+    protected $_before_update = array();
+    protected $_after_update = array();
+    protected $_before_delete = array();
+    protected $_after_delete = array();
 
-    protected $callback_parameters = array();
+    protected $_callback_parameters = array();
 
     public function __construct()
     {
         parent::__construct();
-
-        $this->load->helper('inflector');
     }
 
     public function __call($method,$args)
@@ -44,31 +45,49 @@ class MY_Model extends CI_Model {
         {
             case 'get_':
                 $key = substr($method,4);
-                $data = isset($this->$key) ? $this->$key : NULL;
+                $data = isset($this->_data[$key]) ? $this->_data[$key] : NULL;
 
                 return $data;
 
             case 'set_':
                 $key = substr($method,4);
-                $this->key = isset($args[0]) ? $args[0] : NULL;
+                $this->_data[$key]= isset($args[0]) ? $args[0] : NULL;
         }
 
     }
 
+    /**
+     * Retorna registros
+     */
     public function get_all()
     {
+        $this->trigger('_before_get');
+
         $this->db->from($this->_table);
 
         $query = $this->db->get();
 
         $num_rows = $query->num_rows();
 
+        $result_object = array();
+        $class_name = $this->_modelObject;
+
         if( $num_rows > 0 )
         {
-            $result = $query->result($this->_modelObject);
+            $result = $query->result();
+
+            foreach ( $result as $row )
+            {
+                $row = $this->trigger('_after_get', $row);
+
+                $object = new $class_name();
+                $object->_data = $row;
+
+                $result_object[] = $object;
+            }
 
             $this->_num_rows = $num_rows;
-            $this->_result = $result;
+            $this->_result = $result_object;
         }
 
         return $this;
@@ -95,36 +114,36 @@ class MY_Model extends CI_Model {
 
     public function get_row()
     {
+        $this->trigger('_before_get');
+
         $this->db
             ->from($this->_table)
             ->limit(1);
 
         $query = $this->db->get();
         $num_rows = $query->num_rows();
+        $class_name = $this->_modelObject;
 
         if( $num_rows > 0 )
         {
-            $this->trigger('before_get');
+            $row = $query->row();
+            $row = $this->trigger('_after_get', $row);
 
-            $row = $query->row(0,$this->_modelObject);
+            $object = new $class_name();
+            $object->_data = $row;
 
-            $row = $this->trigger('after_get', $row);
-
-            return $row;
+            return $object;
         }
 
         return FALSE;
     }
 
-    public function load($id = NULL)
+    public function load($id)
     {
-        if( ! is_null($id) )
-        {
-            $this->db
-                ->where($this->_primarykey,$id);
-        }
+        $this->db
+            ->where($this->_primarykey,$id);
 
-        $row =  $this->get_row();
+        $row = $this->get_row();
 
         return $row;
     }
@@ -145,6 +164,8 @@ class MY_Model extends CI_Model {
         return $count;
     }
 
+    //---------------------------------------------------------------
+
     public function get_result()
     {
         return $this->_result;
@@ -157,14 +178,26 @@ class MY_Model extends CI_Model {
 
     //---------------------------------------------------------------
 
-    public function get_id()
+    public function set_data($key, $value)
     {
-        return $this->{$this->_primarykey};
+        $this->_data[$key] = $value;
+
+        return $this;
     }
 
-    public function get_creado_em()
+    public function get_data($key)
     {
-        return new DateTime($this->get_data('creado_em'));
+        return isset($this->_data[$key]) ? $this->_data[$key] : NULL;
+    }
+
+    public function get_id()
+    {
+        return $this->get_data[$this->id];
+    }
+
+    public function get_criado_em()
+    {
+        return new DateTime($this->get_data('criado_em'));
     }
 
     public function get_atualizado_em()
@@ -172,52 +205,67 @@ class MY_Model extends CI_Model {
         return new DateTime($this->get_data('atualizado_em'));
     }
 
-    public function get_data($key)
-    {
-        return isset($this->$key) ? $this->$key : NULL;
-    }
-
     //---------------------------------------------------------------
 
-    public function save($data)
+    public function save()
     {
-        if( count($data) )
+        if( isset($this->_data[$this->_primarykey]) )
         {
-            $data = $this->trigger('before_save', $data);
-
-            $this->db->insert($this->_table,$data);
-            $insert_id = $this->db->insert_id();
-
-            $this->trigger('after_save', $insert_id);
-
-            return $insert_id;
+            return $this->_update();
+        }
+        else
+        {
+            return $this->_insert();
         }
 
         return FALSE;
     }
 
-    public function update($data)
+    public function delete()
     {
-        $data = $this->trigger('before_update', $data);
+        $this->trigger('_before_delete');
 
-        $result = $this->db->update($this->_table,$data,array($this->_primarykey => $this->{$this->_primarykey}));
+        $result = $this->db->delete($this->_table,array($this->_primarykey => $this->get_data($this->_primarykey)));
 
-        $this->trigger('after_update', array($data, $result));
+        $this->trigger('_after_delete', $result);
 
         return $result;
     }
 
-    public function delete()
+    protected function _insert()
     {
-        return $this->db->delete($this->_table,array($this->_primarykey => $this->{$this->_primarykey}));
+        $data = $this->trigger('_before_insert');
+
+        $this->db->set($data);
+        $this->db->insert($this->_table);
+
+        $insert_id = $this->db->insert_id();
+
+        $return = $this->trigger('_after_insert', $insert_id);
+
+        return $return;
+    }
+
+    protected function _update()
+    {
+        $data = $this->trigger('_before_update');
+
+        $this->db->set($data);
+        $this->db->where($this->_primarykey, $this->get_data($this->_primarykey));
+
+        $result = $this->db->update($this->_table);
+
+        $this->trigger('_after_update', $result);
+
+        return $result;
     }
 
     //---------------------------------------------------------------
 
-    public function add_attribute_to_select()
+    public function add_attribute_to_select($attribute)
     {
         $this->db
-            ->select('*');
+            ->select($attribute);
 
         return $this;
     }
@@ -262,7 +310,7 @@ class MY_Model extends CI_Model {
         return $this;
     }
 
-    public function set_order($field = 'id', $order = 'ASC')
+    public function set_order($field, $order)
     {
         $this->db->order_by($field,$order);
 
@@ -302,7 +350,7 @@ class MY_Model extends CI_Model {
                 {
                     preg_match('/([a-zA-Z0-9\_\-]+)(\(([a-zA-Z0-9\_\-\., ]+)\))?/', $method, $matches);
                     $method = $matches[1];
-                    $this->callback_parameters = explode(',', $matches[3]);
+                    $this->_callback_parameters = explode(',', $matches[3]);
                 }
 
                 if( method_exists($this,$method) )
