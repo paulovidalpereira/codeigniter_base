@@ -9,37 +9,39 @@ abstract class Light extends CI_Controller {
 		parent::__construct();
 	}
 
-	public function getUrl($link)
+	public function get_Url($link)
 	{
 		return site_url($link);
 	}
 
-	public function getSkinUrl($file)
+	public function get_skin_url($file)
 	{
 		return site_url('skin/'.$this->layout->getLayout().'/'.$file);
 	}
 
-	public function getSingleton($class)
+	public function get_singleton($class)
 	{
 		return $this->$class;
 	}
 
-	public function getModel($model)
-	{
-		return new $model;
+	public function get_model($model, $sufixo = '_model')
+	{	
+		$class = $model.$sufixo;
+		
+		return new $class;
 	}
 
-	public function setData($key,$value)
+	public function set_data($key,$value)
 	{
 		$this->_data[$key] = $value;
 	}
 
-	public function getData($key)
+	public function get_data($key)
 	{
 		return $this->_data[$key];
 	}
 
-	public function formatDate($date, $format = 'd/m/Y')
+	public function format_date($date, $format = 'd/m/Y', $timezone = 'America/Sao_Paulo')
 	{
 		return date($format,strtotime($date));
 	}
