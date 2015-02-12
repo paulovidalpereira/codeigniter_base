@@ -52,6 +52,8 @@ class MY_Model extends CI_Model {
             case 'set_':
                 $key = substr($method,4);
                 $this->_data[$key]= isset($args[0]) ? $args[0] : NULL;
+
+                return $this;
         }
 
     }
@@ -59,7 +61,7 @@ class MY_Model extends CI_Model {
     /**
      * Retorna registros
      */
-    public function get_all()
+    public function get_collection()
     {
         $this->trigger('_before_get');
 
@@ -74,7 +76,7 @@ class MY_Model extends CI_Model {
 
         if( $num_rows > 0 )
         {
-            $result = $query->result();
+            $result = $query->result_array();
 
             foreach ( $result as $row )
             {
@@ -93,23 +95,38 @@ class MY_Model extends CI_Model {
         return $this;
     }
 
-    public function get_collection()
+    public function get_pagination()
     {
+        $this->trigger('_before_get');
+
         $this->db->from($this->_table);
 
         $query = $this->db->get();
 
         $num_rows = $query->num_rows();
 
+        $result_object = array();
+        $class_name = $this->_modelObject;
+
         if( $num_rows > 0 )
         {
-            $result = $query->result($this->_modelObject);
+            $result = $query->result_array();
+
+            foreach ( $result as $row )
+            {
+                $row = $this->trigger('_after_get', $row);
+
+                $object = new $class_name();
+                $object->_data = $row;
+
+                $result_object[] = $object;
+            }
 
             $this->_num_rows = $num_rows;
-            $this->_result = $result;
+            $this->_result = $result_object;
         }
 
-        return $this;  
+        return $this;
     }
 
     public function get_row()
@@ -126,13 +143,12 @@ class MY_Model extends CI_Model {
 
         if( $num_rows > 0 )
         {
-            $row = $query->row();
+            $row = $query->row_array();
             $row = $this->trigger('_after_get', $row);
 
-            $object = new $class_name();
-            $object->_data = $row;
+            $this->_data = $row;
 
-            return $object;
+            return $this;
         }
 
         return FALSE;
@@ -190,19 +206,26 @@ class MY_Model extends CI_Model {
         return isset($this->_data[$key]) ? $this->_data[$key] : NULL;
     }
 
+    public function get_date($date)
+    {
+        $dt = new DateTime($date);
+
+        return $dt;
+    }
+
     public function get_id()
     {
-        return $this->get_data[$this->id];
+        return $this->get_data($this->_primarykey);
     }
 
     public function get_criado_em()
     {
-        return new DateTime($this->get_data('criado_em'));
+        return $this->get_date($this->get_data('criado_em'));
     }
 
     public function get_atualizado_em()
     {
-        return new DateTime($this->get_data('atualizado_em'));
+        return $this->get_date($this->get_data('atualizado_em'));
     }
 
     //---------------------------------------------------------------
@@ -234,9 +257,9 @@ class MY_Model extends CI_Model {
 
     protected function _insert()
     {
-        $data = $this->trigger('_before_insert');
+        $this->trigger('_before_insert');
 
-        $this->db->set($data);
+        $this->db->set($this->_data);
         $this->db->insert($this->_table);
 
         $insert_id = $this->db->insert_id();
@@ -248,9 +271,9 @@ class MY_Model extends CI_Model {
 
     protected function _update()
     {
-        $data = $this->trigger('_before_update');
+        $this->trigger('_before_update');
 
-        $this->db->set($data);
+        $this->db->set($this->_data);
         $this->db->where($this->_primarykey, $this->get_data($this->_primarykey));
 
         $result = $this->db->update($this->_table);
