@@ -18,7 +18,7 @@ class Notificacao {
 		$this->_mensagens = $ci->session->flashdata('_mensagens');
 	}
 
-	private function _addMensage($texto, $codigo, $flash = FALSE )
+	private function _add_mensage($texto, $codigo, $flash = FALSE )
 	{
 		if( $flash )
 		{
@@ -32,24 +32,24 @@ class Notificacao {
 		}
 	}
 
-	public function addError($texto, $flash = FALSE)
+	public function add_error($texto, $flash = FALSE)
 	{
-		$this->_addMensage($texto, self::ERROR, $flash);
+		$this->_add_mensage($texto, self::ERROR, $flash);
 	}
 
-	public function addWarning($texto, $flash = FALSE)
+	public function add_warning($texto, $flash = FALSE)
 	{
-		$this->_addMensage($texto, self::WARNING, $flash);
+		$this->_add_mensage($texto, self::WARNING, $flash);
 	}
 
-	public function addNotice($texto, $flash = FALSE)
+	public function add_notice($texto, $flash = FALSE)
 	{
-		$this->_addMensage($texto, self::NOTICE, $flash);
+		$this->_add_mensage($texto, self::NOTICE, $flash);
 	}
 
-	public function addSuccess($texto, $flash = FALSE)
+	public function add_success($texto, $flash = FALSE)
 	{
-		$this->_addMensage($texto, self::SUCCESS, $flash);
+		$this->_add_mensage($texto, self::SUCCESS, $flash);
 	}
 
 	public function render()

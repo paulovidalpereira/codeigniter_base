@@ -21,16 +21,16 @@ class Layout extends Object {
 
     public function view($file)
     {
-        $this->load->view($this->getPackage().'/'.$file);
+        $this->load->view($this->get_package().'/'.$file);
     }
 
     public function render()
     {
         $this->load->vars($this->_data);
-        $this->load->view($this->getPackage().'/'.$this->getClass().'/'.$this->getMethod());
+        $this->load->view($this->get_package().'/'.$this->get_class().'/'.$this->get_method());
     }
 
-    public function addItem($file, $type, $package = null, $head = false)
+    public function add_item($file, $type, $package = null, $head = false)
     {
         if( $type == 'css' )
         {
@@ -39,7 +39,7 @@ class Layout extends Object {
                 $file = $file.'.css';
             }
 
-            $this->_css_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
+            $this->_css_files[] = site_url('skin/'.( ($package == null )? $this->get_package() : $package ).'/'.$file);
 
         }
         elseif( $type == 'js' )
@@ -51,11 +51,11 @@ class Layout extends Object {
 
             if( ! $head )
             {
-                $this->_js_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
+                $this->_js_files[] = site_url('skin/'.( ($package == null )? $this->get_package() : $package ).'/'.$file);
             }
             else
             {
-                $this->_js_head_files[] = site_url('skin/'.( ($package == null )? $this->getPackage() : $package ).'/'.$file);
+                $this->_js_head_files[] = site_url('skin/'.( ($package == null )? $this->get_package() : $package ).'/'.$file);
             }
         }
     }
@@ -63,15 +63,15 @@ class Layout extends Object {
     /**
      * Adiciona CSS
      */
-    public function addCss($file)
+    public function add_css($file)
     {
-        $this->addItem('css/'.$file,'css');
+        $this->add_item('css/'.$file,'css');
     }
 
     /**
      * Renderiza Linhas Css
      */
-    public function renderCss()
+    public function render_css()
     {
         $output = '';
 
@@ -89,15 +89,15 @@ class Layout extends Object {
     /**
      * Adiciona JS
      */
-    public function addJs($file, $head = false)
+    public function add_js($file, $head = false)
     {
-        $this->addItem('js/'.$file,'js',null,$head);
+        $this->add_item('js/'.$file,'js',null,$head);
     }
 
     /**
      * Renderiza Linhas Js
      */
-    public function renderJs($head = false)
+    public function render_js($head = false)
     {
         $output = '';
 
@@ -122,32 +122,32 @@ class Layout extends Object {
         return $output;
     }
 
-    public function getClass()
+    public function get_class()
     {
         return $this->_class;
     }
 
-    public function getMethod()
+    public function get_method()
     {
         return $this->_method;
     }
 
-    public function setPackage($package)
+    public function set_package($package)
     {
         return $this->_package = $package;
     }
 
-    public function getPackage()
+    public function get_package()
     {
         return $this->_package;
     }
 
-    public function setTitulo($titulo)
+    public function set_titulo($titulo)
     {
         $this->_titulo = $titulo;
     }
 
-    public function getTitulo()
+    public function get_titulo()
     {
         return $this->_titulo;
     }

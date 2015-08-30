@@ -65,6 +65,7 @@ class MY_Model extends CI_Model {
     {
         $this->trigger('_before_get');
 
+        // $this->db->select($this->_table.'.*');
         $this->db->from($this->_table);
 
         $query = $this->db->get();
@@ -295,7 +296,12 @@ class MY_Model extends CI_Model {
 
     public function add_attribute_to_filter($field, $condition = NULL)
     {
-        if( ! is_array($condition) )
+        if( $condition == NULL )
+        {
+            $this->db
+                ->where($field);
+        }
+        elseif( ! is_array($condition) )
         {
             $this->db
                 ->where($field, $condition);
@@ -385,6 +391,11 @@ class MY_Model extends CI_Model {
         }
 
         return $data;
+    }
+
+    public function get_sql()
+    {
+        return $this->db->get_compiled_select(null,false);
     }
 
 }

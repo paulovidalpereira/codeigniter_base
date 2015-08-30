@@ -4,17 +4,17 @@ class Navegacao extends Object {
 
 	private $_menus = array();
 
-	public function addMenu($titulo, $url = null, $icone = NULL, $active = NULL)
+	public function add_menu($titulo, $url = null, $icone = NULL, $active = NULL)
 	{
 		$this->_menus[$url] = array('titulo' => $titulo, 'url' => $url, 'icone' => $icone, 'active' => ($this->uri->uri_string() == $url)? TRUE: FALSE);
 	}
 
-	public function addSubmenu()
+	public function add_submenu()
 	{
 		# code...
 	}
 
-	public function setActiveMenu($value='')
+	public function set_active_menu($value='')
 	{
 		# code...
 	}

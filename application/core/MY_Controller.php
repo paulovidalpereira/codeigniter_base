@@ -9,14 +9,14 @@ abstract class Light extends CI_Controller {
 		parent::__construct();
 	}
 
-	public function get_Url($link)
+	static public function get_Url($link)
 	{
 		return site_url($link);
 	}
 
 	public function get_skin_url($file)
 	{
-		return site_url('skin/'.$this->layout->getLayout().'/'.$file);
+		return site_url('skin/'.$this->layout->get_package().'/'.$file);
 	}
 
 	public function get_singleton($class)
@@ -24,9 +24,9 @@ abstract class Light extends CI_Controller {
 		return $this->$class;
 	}
 
-	public function get_model($model, $sufixo = '_model')
+	static public function get_model($model, $sufixo = '_model')
 	{	
-		$class = $model.$sufixo;
+		$class = ucfirst($model).$sufixo;
 		
 		return new $class;
 	}
