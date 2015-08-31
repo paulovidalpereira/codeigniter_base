@@ -1,0 +1,11 @@
+{
+    "name": "recurse/codeigniter_base",
+    "authors": [
+        {
+            "name": "Paulo Pereira",
+            "email": "paulo@recurse.com.br"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
