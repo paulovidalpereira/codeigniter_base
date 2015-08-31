@@ -1,6 +1,6 @@
 {
     "name": "recurse/codeigniter_base",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.4.0"
     }
